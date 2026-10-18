@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAA5fUGbA6MLxNvsENG1jZFeOdnxp-eSkO",
+    authDomain: "eazypaisa-f7418.firebaseapp.com",
+    projectId: "eazypaisa-f7418",
+    storageBucket: "eazypaisa-f7418.firebasestorage.app",
+    messagingSenderId: "702963002169",
+    appId: "1:702963002169:web:3bfc450e50d413e80a16e8",
+    measurementId: "G-WT86SKYXFT"
+  };
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Enter Amount</title>
+<style>
+  @font-face {
+    font-family: 'Inter Custom';
+    src: url('Inter_24pt-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    margin: 0; padding: 0;
+    width: 100%; min-height: 100vh;
+    min-height: 100dvh;
+    background-color: #f4f6f5;
+    font-family: 'Inter Custom', Arial, Helvetica, sans-serif;
+    color: #2e2a36;
+  }
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #ffffff;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+  }
+  .top-bar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .back-btn {
+    width: 38px; height: 38px;
+    border: 1.5px solid #d8deda;
+    border-radius: 10px;
+    background: transparent;
+    display: grid; place-items: center;
+    cursor: pointer;
+    font-size: 20px; 
+    color: #333;
+  }
+
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0 4px 0;
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  .brand-logo-badge {
+    width: 54px; height: 54px;
+    border: 1.5px solid #d8deda;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    overflow: hidden;
+    padding: 2px;
+  }
+  .brand-logo-badge img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .pay-to {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 30px;
+  }
+
+  .amount-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 40px 0;
+    cursor: pointer;
+    position: relative;
+  }
+  .amount-display-box {
+    display: inline-flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 4px;
+  }
+  .currency {
+    font-size: 19px;
+    font-weight: 600;
+    color: #222;
+    margin-top: 10px;
+    font-family: 'Inter Custom', sans-serif !important;
+  }
+  .amount-text {
+    font-size: 62px;
+    font-weight: 600;
+    color: #222;
+    font-family: 'Inter Custom', sans-serif !important;
+  }
+  .amount-text.placeholder {
+    color: #ccc;
+  }
+
+  .real-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+  }
+
+  .balance-info {
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 24px;
+  }
+  .balance-amount {
+    color: #25b368;
+    font-weight: 600;
+  }
+  .msg-btn {
+    margin: 0 auto 30px auto;
+    padding: 10px 22px;
+    background: #edf5f0;
+    border: none;
+    border-radius: 6px;
+    color: #000000;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .next-btn {
+    margin: 20px auto 0 auto;
+    width: 76%;
+    height: 42px;
+    background-color: #8c8891;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: block;
+    transition: background 0.2s;
+  }
+  .next-btn.active {
+    background-color: #25b368;
+  }
+  /* Custom Modal Popup Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+  }
+  .modal-overlay.active {
+    display: flex;
+  }
+  .modal-box {
+    background: #ffffff;
+    width: 100%;
+    max-width: 340px;
+    border-radius: 18px;
+    padding: 24px 20px 20px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    animation: popupAnim 0.25s ease-out;
+  }
+  @keyframes popupAnim {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+.modal-icon {
+    width: 60px;
+    height: 60px;
+    background: #ffffff;
+    border: 1.5px solid #d8deda;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    padding: 6px;
+  }
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+  }
+  .modal-message {
+    font-size: 14px;
+    color: #555555;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+  .modal-btn {
+    width: 100%;
+    height: 44px;
+    background-color: #25b368;
+    color: #ffffff;
+    border: none;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+</style>
+</head>
+<body onclick="document.getElementById('realInput').focus()">
+
+<div class="container">
+  <div class="top-bar">
+    <button class="back-btn" onclick="event.stopPropagation(); window.location.href='sendmoney.html'">&lt;</button>
+  </div>
+
+  <div class="header-row">
+    <h1>Enter Amount</h1>
+    <div class="brand-logo-badge">
+      <img src="elogo.png" alt="easypaisa">
+    </div>
+  </div>
+
+  <div class="pay-to" id="payToText">Pay To: Loading...</div>
+
+  <div class="amount-section">
+    <div class="amount-display-box">
+      <span class="currency">Rs.</span>
+      <span id="amountText" class="amount-text placeholder">0</span>
+    </div>
+    <input type="tel" id="realInput" class="real-input" oninput="handleTyping(this)" autofocus>
+  </div>
+
+  <div class="balance-info">
+My Balance: <span class="balance-amount" id="displayBalance">Rs. 7,009.58</span>
+    <img src="reficon.png" alt="refresh" style="width: 14px; height: 14px; vertical-align: middle; margin-left: 4px; cursor: pointer; object-fit: contain;">
+  </div>
+  <button class="msg-btn" onclick="event.stopPropagation()">+ Add a Message</button>
+
+  <button id="nextBtn" class="next-btn" onclick="event.stopPropagation(); generateReceipt()">Next</button>
+</div>
+
+<script>
+  const receiverName = localStorage.getItem('recName') || 'Receiver Name';
+  document.getElementById('payToText').innerText = 'Pay To: ' + receiverName;
+
+  window.onload = function() {
+    document.getElementById('realInput').focus();
+    
+    let currentBal = localStorage.getItem('userBalance');
+    if (currentBal === null) {
+      currentBal = 50000;
+      localStorage.setItem('userBalance', currentBal);
+    } else {
+      currentBal = Number(currentBal);
+    }
+    document.getElementById('displayBalance').innerText = 'Rs. ' + currentBal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  function handleTyping(input) {
+    let value = input.value.replace(/[^0-9]/g, '');
+    const amountText = document.getElementById('amountText');
+    const btn = document.getElementById('nextBtn');
+    
+    if (value) {
+      let formatted = Number(value).toLocaleString('en-US');
+      amountText.innerText = formatted;
+      amountText.classList.remove('placeholder');
+      btn.classList.add('active');
+    } else {
+      amountText.innerText = '0';
+      amountText.classList.add('placeholder');
+      btn.classList.remove('active');
+    }
+  }
+
+  function showModal() {
+    document.getElementById('customModal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('customModal').classList.remove('active');
+  }
+
+function generateReceipt() {
+    const rawValue = document.getElementById('realInput').value.replace(/[^0-9]/g, '');
+    const amount = Number(rawValue);
+
+    if (!amount || amount <= 0) {
+      alert('Please enter a valid amount');
+      return;
+    }
+
+    const activeUser = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (!activeUser || !activeUser.email) {
+      alert('Session expired. Please login again.');
+      window.location.href = 'index.html';
+      return;
+    }
+
+    db.collection('users').doc(activeUser.email).get().then((doc) => {
+      if (!doc.exists) {
+        alert('User not found!');
+        return;
+      }
+
+      const userData = doc.data();
+      const currentBalance = Number(userData.balance || 0);
+
+      if (amount > currentBalance) {
+        showModal();
+        return;
+      }
+
+      const newBalance = currentBalance - amount;
+
+      db.collection('users').doc(activeUser.email).update({
+        balance: newBalance
+      }).then(() => {
+        userData.balance = newBalance;
+        localStorage.setItem('loggedInUser', JSON.stringify(userData));
+        localStorage.setItem('userBalance', newBalance);
+
+        const randomTxId = '#' + Math.floor(10000000000 + Math.random() * 90000000000);
+        const now = new Date();
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        const dateStr = now.toLocaleDateString('en-GB', options);
+        let hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        const timeStr = `${hours}:${minutes} ${ampm}`;
+        const dateTimeFinal = `${dateStr}, ${timeStr}`;
+
+        localStorage.setItem('txId', randomTxId);
+        localStorage.setItem('txDateTime', dateTimeFinal);
+        localStorage.setItem('txAmount', 'Rs. ' + amount.toLocaleString('en-US', {minimumFractionDigits: 2}));
+
+        window.location.href = 'receipt.html';
+      }).catch((err) => {
+        alert('Transaction Error: ' + err.message);
+      });
+
+    }).catch((err) => {
+      alert('Database Error: ' + err.message);
+    });
+  }
+</script>
+<!-- Custom Popup Overlay -->
+<div id="customModal" class="modal-overlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-icon">
+      <img src="elogo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
+    </div>
+    <div class="modal-title">Low Balance</div>
+    <div class="modal-message">Please contact on Whatsapp:<br><strong>0313-9196058</strong></div>
+    <button class="modal-btn" onclick="closeModal()">OK</button>
+  </div>
+</div>
+</body>
+</html>
